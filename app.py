@@ -50,7 +50,7 @@ conn.commit()
 
 # Sidebar for navigation
 st.sidebar.header("Navigation")
-page = st.sidebar.selectbox("Choose a Round", ["Round 1", "Round 2"])
+page = st.sidebar.selectbox("Choose a Page", ["Home", "About", "Round 1", "Round 2"])
 
 def calculate_scores(answers, round_num):
     # Map string answers to numeric values
@@ -72,7 +72,59 @@ def calculate_scores(answers, round_num):
         survey_score = np.mean(answer_values)
         return [language_vocab, memory, speed, visual_discrimination, audio_discrimination, survey_score]
 
-if page == "Round 1":
+if page == "Home":
+    st.title("Welcome to the Dyslexia Prediction Model")
+    st.write("This application helps predict the likelihood of having dyslexia based on quiz answers.")
+    st.image("Webpage/dyslexia1.jpg", use_column_width=True)
+    st.write("Navigate through the sidebar to participate in the quiz or learn more about the project.")
+
+elif page == "About":
+    st.title("About the Dyslexia Prediction Model")
+    st.image("Webpage/ai1.jpg", use_column_width=True, caption="AI Image") if st.file_uploader("Upload 'ai1.jpg'") else st.write("Please upload 'ai1.jpg'.")
+    st.header("Introduction to Dataset")
+    st.write("""
+        This project utilizes machine learning to analyze quiz scores and predict an applicant's likelihood of having dyslexia. The dataset contains scores from various sections:
+        - Language Vocabulary
+        - Memory
+        - Processing Speed
+        - Visual Discrimination
+        - Auditory Discrimination
+        In addition, a survey score is included. These scores are used to determine a "Dyslexia Risk Label" ranging from 0 to 2:
+        - 0: Low Risk
+        - 1: Moderate Risk
+        - 2: High Risk
+        This model aims to identify individuals who might benefit from further evaluation for dyslexia.
+    """)
+    st.image("Webpage/features.png", width=800)
+    
+    st.header("Calculation of Scores")
+    st.image("Webpage/score.png", width=800)
+
+    st.header("Working of the Model")
+    st.write("""
+        This project aims to predict an applicant's dyslexia risk ("Label") based on the following quiz scores:
+        - Language Vocabulary
+        - Memory
+        - Processing Speed
+        - Visual Discrimination
+        - Auditory Discrimination
+        We additionally include a survey score.
+        To find the optimal model for our dataset, we compared five different machine learning algorithms within the "DyslexiaML" file. These algorithms were:
+        - Decision Tree
+        - Random Forest
+        - Support Vector Machine (SVM)
+        - Random Forest with Grid Search
+        - SVM with Grid Search
+    """)
+    st.image("Webpage/graph.png", width=800)
+    st.image("Webpage/error.png", width=200)
+    st.write("""
+        On the basis of our findings, we then created the final model using RandomForestClassifier with GridSearchCV in order to make the most accurate predictions, in 'DyslexiaML_final' file. This model was then tested on a new dataset to find the labels, which were then compared with the actual label values. After this check we found out that our model was able to make predictions for dyslexia with a 5.8% error rate.
+    """)
+    st.image("Webpage/cm.jpeg", width=800)
+    st.markdown("[Link to our GitHub Repository](https://github.com)")
+
+elif page == "Round 1":
     st.title("Dyslexia Prediction Model - Round 1")
     st.write("Enter your quiz answers in the sidebar to predict the likelihood of having dyslexia.")
     
@@ -106,7 +158,6 @@ if page == "Round 1":
         st.write(f"Visual Discrimination Score: {scores_round1[3]:.2f}")
         st.write(f"Audio Discrimination Score: {scores_round1[4]:.2f}")
         st.write(f"Survey Score: {scores_round1[5]:.2f}")
-        
         # Save the results to the database
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         c.execute("INSERT INTO results (timestamp, round, language_vocab, memory, speed, visual_discrimination, audio_discrimination, survey_score, prediction) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -162,15 +213,7 @@ elif page == "Round 2":
         st.write(f"Mean Score Round 2: {mean_score_round2}")
         
         # Save the results to the database
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        c.execute("INSERT INTO results (timestamp, round, language_vocab, memory, speed, visual_discrimination, audio_discrimination, survey_score, prediction) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-          (timestamp,Round, scores[0], scores[1], scores[2], scores[3], scores[4], scores[5], prediction[0]))
-
-
-
-
-
-
+       
 
 
     
