@@ -7,7 +7,7 @@
         body {
             font-family: 'Times New Roman', Times, serif;
         }
-
+        
         header {
             height: 70px;
             background-color: #73b7c9dd;
@@ -15,24 +15,23 @@
             text-align: right;
             position: static;
         }
-
+        
         span {
             background-color: #e9eef0;
             font-weight: 100;
             font-size: 30px;
-
             opacity: 0.7;
             padding: 10px;
             transition: cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s;
         }
-
+        
         span:hover {
             background-color: #73b7c9dd;
             border: 0px;
         }
-
+        
         .parallax1 {
-            background-image: url("quiz1.jpg");
+            background-image: url("quiz.jpeg");
             min-height: 200px;
             background-attachment: fixed;
             background-position: center;
@@ -40,32 +39,32 @@
             background-size: cover;
             padding: 5em;
         }
-
+        
         .main {
             background-color: #73b7c9dd;
             padding: 10px;
         }
-
+        
         .question {
             background-color: #e9eef0;
             font-size: 25px;
             font-weight: 400;
             padding: 2em;
         }
-
+        
         #question {
             background-color: #7eb1be;
             font-size: 30px;
             text-align: center;
             padding: 10px;
         }
-
+        
         #button {
             background-color: #73b7c9dd;
             font-size: 50px;
             text-align: center;
         }
-
+        
         .footer {
             height: 55px;
             background-color: #73b7c9dd;
@@ -75,40 +74,40 @@
             position: static;
             padding-bottom: 2em;
         }
-
+        
         a:link {
             color: black;
             text-decoration-line: none;
         }
-
+        
         a:visited {
             color: black;
             text-decoration-line: none;
         }
-
+        
         a:hover {
             color: #2d2d2e;
             text-decoration-line: none;
         }
-
+        
         a:active {
             color: black;
             text-decoration-line: none;
         }
-
+        
         #select {
             font-weight: 800;
             border: 2px solid black;
             margin-right: 0.2em;
         }
-
+        
         #warning {
             background-color: #73b7c9ff;
             font-size: 30px;
             text-align: center;
             padding: 20px;
         }
-
+        
         .content {
             background-color: #73b7c955;
             padding: 10px;
@@ -126,9 +125,7 @@
     </header>
     <div class="parallax1">
         <div id="warning">
-            <centre> This quiz is specially designed for students to test if they are dyslexic or not. Students are
-                advised to attempt all the questions patiently under the surveillance of an elder.<br>
-                ALL THE BEST JUNIOR!</centre>
+            <centre> This quiz is specially designed for students to test if they are dyslexic or not. Students are advised to attempt all the questions patiently under the surveillance of an elder.<br> ALL THE BEST JUNIOR!</centre>
         </div>
     </div>
     <div class="main">
@@ -255,6 +252,14 @@
                     <input type="radio" id="First one is right and next one is left" name="q9" value="4" disabled>
                     <label for="First one is right and next one is left">First one is right and next one is
                         left</label><br>
+                    <input type="radio" id="First one is left and next one is right" name="q9" value="0" disabled>
+                    <label for="First one is left and next one is right">First one is left and next one is
+                        right</label><br>
+                </div>
+                <br>
+
+                <span id="question">
+                    Question 10
                 </span><br><br>
                 <div class="content">
                     What do you hear?<br><br>
@@ -277,20 +282,9 @@
         </form>
     </div>
     <div class="footer">
-        2021 WEBpredictor<br>
-        All rights reserved<br>
-        Issued in public interest<br>
-        WEBpredictor does not provide any medical advice, diagnosis or treatment.<br>
+        2021 WEBpredictor<br> All rights reserved<br> Issued in public interest<br> WEBpredictor does not provide any medical advice, diagnosis or treatment.<br>
     </div>
 
 </body>
 
-</html>               <input type="radio" id="First one is left and next one is right" name="q9" value="0" disabled>
-                    <label for="First one is left and next one is right">First one is left and next one is
-                        right</label><br>
-                </div>
-                <br>
-
-                <span id="question">
-                    Question 10
-     
+</html>
