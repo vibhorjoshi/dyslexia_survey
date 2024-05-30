@@ -3,23 +3,24 @@ import pickle
 import numpy as np
 import sqlite3
 from datetime import datetime
+import joblib
 
 # Load the pickled model
-with open('model.pickle', 'rb') as file:
-    model = pickle.load(file)
-
-# Define quiz questions and options for both rounds
+with open('model.pkl', 'rb') as file:
+    model = joblib.load('model.pkl')
+    
+    # Define quiz questions and options for both rounds
 questions_round1 = [
-    "How often do you find it difficult to follow instructions?",
-    "How often do you forget things you have just read?",
-    "How often do you struggle to read words correctly?",
-    "How often do you mix up letters in words?",
-    "How often do you find it hard to concentrate?",
-    "How often do you lose your place while reading?",
-    "How often do you mispronounce words?",
-    "How often do you confuse similar-looking words?",
-    "How often do you find it hard to remember what you read?",
-    "How often do you need to re-read sentences to understand them?"
+    "Are the letters 'A' and 'A' the same?",
+    "Identify the fruit shown in the image: 🍎 (Apple, Banana, Orange, Grapes).",
+    "Are the letters 'B' and 'D' the same?",
+    "Select the letter 'G' from the options: (E, F, G, H).",
+    "What is the first letter of the word 'CAT'?",
+    "What is the lowercase version of the letter 'H'?",
+    "Identify the sound you hear from the audio clip: (options might include 'Cat', 'Dog', 'Bird', 'Cow').",
+    "Describe what you see in the image below: (options might include 'Tree', 'House', 'Car', 'Mountain').",
+    "Identify which hand is the left hand and which is the right hand in the image below.",
+    "Identify the sound you hear from the audio clip: (options might include 'Bell', 'Whistle', 'Clap', 'Knock')."
 ]
 
 questions_round2 = [
@@ -41,16 +42,33 @@ options = ["Never", "Rarely", "Sometimes", "Often"]
 conn = sqlite3.connect('dyslexia_results.db')
 c = conn.cursor()
 
-# Create results table if it doesn't exist
-c.execute('''CREATE TABLE IF NOT EXISTS results
-             (timestamp TEXT, round INTEGER, language_vocab REAL, memory REAL, speed REAL,
-              visual_discrimination REAL, audio_discrimination REAL, survey_score REAL,
-              prediction INTEGER)''')
-conn.commit()
+# Function to update or create the results table with the correct schema
+def create_or_update_table():
+    # Check if the table exists
+    c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='results'")
+    table_exists = c.fetchone()
+    
+    if table_exists:
+        # Check if the table has the 'round' column
+        c.execute("PRAGMA table_info(results)")
+        columns = [col[1] for col in c.fetchall()]
+        if 'round' not in columns:
+            # Update the schema to include the 'round' column
+            c.execute("ALTER TABLE results ADD COLUMN round INTEGER")
+    else:
+        # Create the results table with the correct schema
+        c.execute('''CREATE TABLE results
+                     (timestamp TEXT, round INTEGER, language_vocab REAL, memory REAL, speed REAL,
+                      visual_discrimination REAL, audio_discrimination REAL, survey_score REAL,
+                      prediction INTEGER)''')
+    conn.commit()
+
+# Ensure the results table exists and has the correct schema
+create_or_update_table()
 
 # Sidebar for navigation
 st.sidebar.header("Navigation")
-page = st.sidebar.selectbox("Choose a Page", ["Home", "About", "Round 1", "Round 2"])
+page = st.sidebar.selectbox("Choose a Page", ["Home", "About", "Round 1", "Round 2", "Suggestions"])
 
 def calculate_scores(answers, round_num):
     # Map string answers to numeric values
@@ -62,7 +80,10 @@ def calculate_scores(answers, round_num):
         visual_discrimination = (answer_values[0] + answer_values[2] + answer_values[3] + answer_values[5]) / 4
         audio_discrimination = (answer_values[6] + answer_values[9]) / 2
         survey_score = sum(answer_values) / len(questions_round1)
-        return [language_vocab, memory, speed, visual_discrimination, audio_discrimination, survey_score]
+        answer_values = [options.index(answer) for answer in answers]
+        survey_score = np.mean(answer_values)
+        total_score = survey_score * 5 if round_num == 1 else survey_score * 1
+        return [language_vocab, memory, speed, visual_discrimination, audio_discrimination,total_score]
     else:
         language_vocab = np.mean([answer_values[0], answer_values[2], answer_values[4], answer_values[6], answer_values[8]])
         memory = np.mean([answer_values[1], answer_values[3], answer_values[5], answer_values[7], answer_values[9]])
@@ -70,7 +91,54 @@ def calculate_scores(answers, round_num):
         visual_discrimination = np.mean([answer_values[0], answer_values[2], answer_values[4], answer_values[6], answer_values[8]])
         audio_discrimination = np.mean([answer_values[1], answer_values[3], answer_values[5], answer_values[7], answer_values[9]])
         survey_score = np.mean(answer_values)
-        return [language_vocab, memory, speed, visual_discrimination, audio_discrimination, survey_score]
+        total_score = survey_score * 5 if round_num == 1 else survey_score * 0
+        return [language_vocab, memory, speed, visual_discrimination, audio_discrimination,total_score]
+ 
+def adjust_features(scores):
+    # Assuming the model expects exactly 6 features. Adjust or select features accordingly.
+    if len(scores) > 6:
+        return scores[:6]
+    while len(scores) < 6:
+        scores.append(0)
+    return scores
+
+    
+def display_prediction(prediction, scores, round_num):
+    # Define the ranges for prediction scores
+    ranges = {
+        0: "0 - 0.5",
+        1: "0.5 - 1",
+        2: "1 - 1.5"
+    }
+    
+    # Display prediction result
+    prediction_text = ["Low Risk", "Moderate Risk", "High Risk"][prediction]
+    st.write(f"**Prediction:** {prediction_text} ({ranges[prediction]})")
+    
+    # Provide a detailed explanation of what the prediction means
+    if prediction == 0:
+        st.write("""
+            **Low Risk**: Based on your answers, you are at a low risk of having dyslexia. This means your responses did not indicate significant signs typically associated with dyslexia. However, if you still have concerns, consider seeking a professional evaluation.
+        """)
+    elif prediction == 1:
+        st.write("""
+            **Moderate Risk**: Based on your answers, you are at a moderate risk of having dyslexia. This suggests some of your responses align with common characteristics of dyslexia. It may be beneficial to consult with a specialist for a comprehensive assessment.
+        """)
+    else:
+        st.write("""
+            **High Risk**: Based on your answers, you are at a high risk of having dyslexia. Many of your responses are consistent with symptoms of dyslexia. It is strongly recommended to seek a professional evaluation to understand your condition better and explore possible interventions.
+        """)
+       
+            
+   
+    
+    st.write("Detailed scores:")
+    st.write(f"Language Vocabulary Score: {scores[0]:.2f}")
+    st.write(f"Memory Score: {scores[1]:.2f}")
+    st.write(f"Speed Score: {scores[2]:.2f}")
+    st.write(f"Visual Discrimination Score: {scores[3]:.2f}")
+    st.write(f"Audio Discrimination Score: {scores[4]:.2f}")
+    st.write(f"Survey Score: {scores[5]:.2f}")
 
 if page == "Home":
     st.title("Welcome to the Dyslexia Prediction Model")
@@ -109,65 +177,37 @@ elif page == "About":
         - Visual Discrimination
         - Auditory Discrimination
         We additionally include a survey score.
-        To find the optimal model for our dataset, we compared five different machine learning algorithms within the "DyslexiaML" file. These algorithms were:
-        - Decision Tree
-        - Random Forest
-        - Support Vector Machine (SVM)
-        - Random Forest with Grid Search
-        - SVM with Grid Search
+        To find the optimal model for our dataset, we compared five different machine learning algorithms within the "DyslexiaML" file.
     """)
-    st.image("Webpage/graph.png", width=800)
-    st.image("Webpage/error.png", width=200)
-    st.write("""
-        On the basis of our findings, we then created the final model using RandomForestClassifier with GridSearchCV in order to make the most accurate predictions, in 'DyslexiaML_final' file. This model was then tested on a new dataset to find the labels, which were then compared with the actual label values. After this check we found out that our model was able to make predictions for dyslexia with a 5.8% error rate.
-    """)
-    st.image("Webpage/cm.jpeg", width=800)
-    st.markdown("[Link to our GitHub Repository](https://github.com)")
-
 elif page == "Round 1":
     st.title("Dyslexia Prediction Model - Round 1")
     st.write("Enter your quiz answers in the sidebar to predict the likelihood of having dyslexia.")
-    
-    # Sidebar for quiz input
+
+    # Sidebar for round 1 quiz input
     st.sidebar.header("Round 1 Quiz Questions")
     answers_round1 = []
     for i, question in enumerate(questions_round1):
         answers_round1.append(st.sidebar.radio(f"{i+1}. {question}", options, index=2))
-    
-    # Calculate scores
-    scores_round1 = calculate_scores(answers_round1, 1)
-    
-    # Predict button
-    if st.button("Predict Round 1"):
-        # Reshape scores for prediction
-        scores_reshaped = np.array(scores_round1).reshape(1, -1)
-        prediction = model.predict(scores_reshaped)
+
+    if st.sidebar.button("Submit Round 1 Answers"):
+        scores = calculate_scores(answers_round1, 1)
+        scores_reshaped = np.array(scores).reshape(1, -1)
+        prediction = model.predict(scores_reshaped)[0]
+       
+        # Store Round 1 results in the session state
         
-        # Display result
-        if prediction == 0:
-            st.success("Low chance of dyslexia.")
-        elif prediction == 1:
-            st.warning("Moderate chance of dyslexia.")
-        else:
-            st.error("High chance of dyslexia.")
-        
-        st.write("Detailed scores:")
-        st.write(f"Language Vocabulary Score: {scores_round1[0]:.2f}")
-        st.write(f"Memory Score: {scores_round1[1]:.2f}")
-        st.write(f"Speed Score: {scores_round1[2]:.2f}")
-        st.write(f"Visual Discrimination Score: {scores_round1[3]:.2f}")
-        st.write(f"Audio Discrimination Score: {scores_round1[4]:.2f}")
-        st.write(f"Survey Score: {scores_round1[5]:.2f}")
-        # Save the results to the database
+
+        # Save results to the database
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        c.execute("INSERT INTO results (timestamp, round, language_vocab, memory, speed, visual_discrimination, audio_discrimination, survey_score, prediction) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                  (timestamp, 1, scores_round1[0], scores_round1[1], scores_round1[2], scores_round1[3], scores_round1[4], scores_round1[5], prediction[0]))
+        c.execute("INSERT INTO results (timestamp, round, language_vocab, memory, speed, visual_discrimination, audio_discrimination, survey_score,prediction ) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)",
+                  (timestamp, 1, *scores, prediction))
         conn.commit()
 
-        st.write("Results saved to the database.")
+        # Display the prediction result
+        display_prediction(prediction, scores, 1,)
         
         # Redirect to round 2 if survey score >= 2
-        if scores_round1[5] >= 2:
+        if scores == 0.5:
             st.write("You have been redirected to Round 2.")
             st.experimental_rerun()
 
@@ -176,44 +216,93 @@ elif page == "Round 2":
     st.write("Enter your quiz answers in the sidebar to predict the likelihood of having dyslexia.")
     
     # Sidebar for round 2 quiz input
+    
     st.sidebar.header("Round 2 Quiz Questions")
     answers_round2 = []
     for i, question in enumerate(questions_round2):
         answers_round2.append(st.sidebar.radio(f"{i+1}. {question}", options, index=2))
-    
-    # Calculate scores
-    scores_round2 = calculate_scores(answers_round2, 2)
-    total_score_round2 = sum(scores_round2)
-    mean_score_round2 = total_score_round2 / len(scores_round2)
 
-    
-    # Predict button for round 2
-    if st.button("Predict Round 2"):
-        # Reshape scores for prediction
-        scores_reshaped = np.array(scores_round2).reshape(1, -1)
-        prediction = model.predict(scores_reshaped)
+    if st.sidebar.button("Submit Round 2 Answers"):
+        scores = calculate_scores(answers_round2, 1)
+        scores_reshaped = np.array(scores).reshape(1, -1)
+        prediction = model.predict(scores_reshaped)[0]
         
-        # Display result
-        if prediction == 0:
-            st.success("Low chance of dyslexia.")
-        elif prediction == 1:
-            st.warning("Moderate chance of dyslexia.")
-        else:
-            st.error("High chance of dyslexia.")
-        
-        st.write("Detailed scores:")
-        st.write(f"Language Vocabulary Score: {scores_round2[0]:.2f}")
-        st.write(f"Memory Score: {scores_round2[1]:.2f}")
-        st.write(f"Speed Score: {scores_round2[2]:.2f}")
-        st.write(f"Visual Discrimination Score: {scores_round2[3]:.2f}")
-        st.write(f"Audio Discrimination Score: {scores_round2[4]:.2f}")
-        st.write(f"Survey Score: {scores_round2[5]:.2f}")
-         #Display total and mean score
-        st.write(f"Total Score Round 2: {total_score_round2}")
-        st.write(f"Mean Score Round 2: {mean_score_round2}")
-        
-        # Save the results to the database
+        # Store Round 2 results in the session state
        
+        # Save results to the database
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        c.execute("INSERT INTO results (timestamp, round, language_vocab, memory, speed, visual_discrimination, audio_discrimination, survey_score, prediction) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                  (timestamp, 2, *scores, prediction))
+        conn.commit()
 
+        # Display the prediction result
+        display_prediction(prediction,scores,2)
+
+ #Suggestions Page
+elif page == "Suggestions":
+    st.title("Personalized Suggestions")
+    st.write("Based on your quiz results, here are some suggestions to help you:")
+
+    # Display suggestions based on scores
+    st.sidebar.header("Detailed Suggestions")
+    if "results" in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall():
+        results = conn.execute("SELECT * FROM results ORDER BY timestamp DESC LIMIT 1").fetchone()
+        if results:
+            _, round_num, language_vocab, memory, speed, visual_discrimination, audio_discrimination, survey_score, prediction = results
+            
+            st.sidebar.write(f"**Language Vocabulary Score:** {language_vocab:.2f}")
+            st.sidebar.write(f"**Memory Score:** {memory:.2f}")
+            st.sidebar.write(f"**Speed Score:** {speed:.2f}")
+            st.sidebar.write(f"**Visual Discrimination Score:** {visual_discrimination:.2f}")
+            st.sidebar.write(f"**Audio Discrimination Score:** {audio_discrimination:.2f}")
+            st.sidebar.write(f"**Survey Score:** {survey_score:.2f}")
+            st.sidebar.write(f"**Prediction:** {['Low Risk', 'Moderate Risk', 'High Risk'][prediction]}")
+
+            total_score = language_vocab + memory + speed + visual_discrimination + audio_discrimination
+            st.write(f"**Total Score (Out of 10):** {total_score:.2f}")
+
+            st.write("### Recommendations:")
+            if prediction == 0:
+                st.write("Based on your total score, it appears that you are at low risk of dyslexia. It is still advisable to consult with a professional for confirmation.")
+            elif prediction == 1:
+                st.write("Based on your total score, it appears that you are at moderate risk of dyslexia. We recommend consulting with a specialist for further evaluation.")
+            else:
+                st.write("Based on your total score, it appears that you are at high risk of dyslexia. It is strongly recommended to seek professional evaluation and support.")
+
+# Run the Streamlit app
+
+def create_or_update_table():
+    # Check if the table exists
+    c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='results'")
+    table_exists = c.fetchone()
+    
+    if not table_exists:
+        # Create the results table with the correct schema
+        c.execute('''CREATE TABLE results
+                     (timestamp TEXT, round INTEGER, language_vocab REAL, memory REAL, speed REAL,
+                      visual_discrimination REAL, audio_discrimination REAL, survey_score REAL,
+                      total_score REAL, prediction INTEGER)''')
+    else:
+        # Check if the table has the correct schema
+        c.execute("PRAGMA table_info(results)")
+        columns = [col[1] for col in c.fetchall()]
+        
+        expected_columns = ['timestamp', 'round', 'language_vocab', 'memory', 'speed',
+                            'visual_discrimination', 'audio_discrimination', 'survey_score',
+                            'total_score', 'prediction']
+        
+        # Add missing columns if they do not exist
+        for col in expected_columns:
+            if col not in columns:
+                c.execute(f"ALTER TABLE results ADD COLUMN {col} REAL")
+    
+    conn.commit()
+
+# Ensure the results table exists and has the correct schema
+create_or_update_table()
+
+    
+# Close the database connection when done
+conn.close()
 
     
