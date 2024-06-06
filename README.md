@@ -31,15 +31,23 @@ streamlit run app.py
 3. Participate in Round 1 and Round 2 quizzes to predict the likelihood of having dyslexia.
 
 ## Folder Structure
-dyslexia-prediction/
-│
+dyslexia-prediction
+
+
 ├── app.py
+
 ├── model.pickle
+
 ├── requirements.txt
+
 ├── dyslexia_results.db
+
 ├── README.md
+
 └── Webpage/
+
 ├── dyslexia1.jpg
+
 ├── ai1.jpg
 
 
