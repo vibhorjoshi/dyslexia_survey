@@ -4,26 +4,12 @@ import numpy as np
 import sqlite3
 from datetime import datetime
 import joblib
-import requests
 
-url = 'https://github.com/vibhorjoshi/dyslexia_survey/raw/main/model.pkl'
-
-try:
-    response = requests.get(url)
-    response.raise_for_status()  # Check for HTTP errors
-
-    with open('model.pkl', 'wb') as file:
-        file.write(response.content)
-
-    # Load the pickled model
-    with open('model.pkl', 'rb') as file:
-        model = joblib.load(file)
-
-except requests.RequestException as e:
-    st.error(f"An error occurred while downloading the file: {e}")
-except Exception as e:
-    st.error(f"An error occurred: {e}")
+# Load the pickled model
+with open('model.pkl', 'rb') as file:
+    model = joblib.load('model.pkl')
     
+    # Define quiz questions and options for both rounds
 questions_round1 = [
     "Are the letters 'A' and 'A' the same?",
     "Identify the fruit shown in the image: 🍎 (Apple, Banana, Orange, Grapes).",
