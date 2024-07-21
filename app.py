@@ -1,11 +1,8 @@
 import streamlit as st
 import pickle
 import numpy as np
-import sqlite3
-from datetime import datetime
-import joblib
 import requests
-import pandas as pd
+import joblib
 
 # Load the pickled model
 url = 'https://github.com/vibhorjoshi/dyslexia_survey/raw/main/model.pkl'
@@ -19,7 +16,7 @@ try:
 
     # Load the pickled model using joblib
     with open('model.pkl', 'rb') as file:
-        model = joblib.load(file)
+        model = joblib.load(file)  # Ensure compatibility with joblib
 
 except requests.RequestException as e:
     st.error(f"An error occurred while downloading the file: {e}")
@@ -29,19 +26,16 @@ except Exception as e:
 # Dummy data for prediction
 scores_reshaped = np.array([1.0, 2.0, 3.0]).reshape(1, -1)
 
-try:
-    # Check the type of the model and input data
-    st.write(f"Model type: {type(model)}")
-    st.write(f"Input data shape: {scores_reshaped.shape}")
+# Check if the model is loaded before using it
+if 'model' in locals():
+    try:
+        prediction = model.predict(scores_reshaped)[0]
+        st.write(f"Prediction: {prediction}")
+    except Exception as e:
+        st.error(f"An error occurred during prediction: {e}")
+else:
+    st.error("Model is not loaded.")
 
-    # Make prediction
-    prediction = model.predict(scores_reshaped)[0]
-    st.write(f"Prediction: {prediction}")
-
-except AttributeError as e:
-    st.error(f"An error occurred with model prediction: {e}")
-except Exception as e:
-    st.error(f"An error occurred: {e}")
     # Define quiz questions and options for both rounds
 questions_round1 = [
     "Are the letters 'A' and 'A' the same?",
