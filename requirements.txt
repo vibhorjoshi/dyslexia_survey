@@ -77,7 +77,7 @@ wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==3.5.1
 yarg==0.1.9
-scikit-learn
-joblib
+scikit-learn==1.2.0 
+joblib==1.2.0
 numpy
 pandas
