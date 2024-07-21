@@ -80,3 +80,4 @@ yarg==0.1.9
 scikit-learn
 joblib
 numpy
+pandas
