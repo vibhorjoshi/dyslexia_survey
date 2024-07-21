@@ -5,6 +5,7 @@ import sqlite3
 from datetime import datetime
 import joblib
 import requests
+import pandas as pd
 
 # Load the pickled model
 url = 'https://github.com/vibhorjoshi/dyslexia_survey/raw/main/model.pkl'
