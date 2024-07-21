@@ -5,13 +5,23 @@ import sqlite3
 from datetime import datetime
 import joblib
 
-# Load the pickled model
 url = 'https://github.com/vibhorjoshi/dyslexia_survey/raw/main/model.pkl'
-response = requests.get(url)
 
-with open('model.pkl', 'wb') as file:
-    file.write(response.content)
-    
+try:
+    response = requests.get(url)
+    response.raise_for_status()  # Check for HTTP errors
+
+    with open('model.pkl', 'wb') as file:
+        file.write(response.content)
+
+    # Load the pickled model
+    with open('model.pkl', 'rb') as file:
+        model = pickle.load(file)
+
+except requests.RequestException as e:
+    st.error(f"An error occurred while downloading the file: {e}")
+except Exception as e:
+    st.error(f"An error occurred: {e}")
     
     # Define quiz questions and options for both rounds
 questions_round1 = [
