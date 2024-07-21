@@ -24,8 +24,7 @@ except requests.RequestException as e:
 except Exception as e:
     st.error(f"An error occurred: {e}")
     
-    # Define quiz questions and options for both rounds
-questions_round1 = [
+  questions_round1 = [
     "Are the letters 'A' and 'A' the same?",
     "Identify the fruit shown in the image: 🍎 (Apple, Banana, Orange, Grapes).",
     "Are the letters 'B' and 'D' the same?",
@@ -284,13 +283,38 @@ elif page == "Suggestions":
             else:
                 st.write("Based on your total score, it appears that you are at high risk of dyslexia. It is strongly recommended to seek professional evaluation and support.")
 
-# Close the database connection when done
-conn.close()
-
-
 # Run the Streamlit app
 
+def create_or_update_table():
+    # Check if the table exists
+    c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='results'")
+    table_exists = c.fetchone()
+    
+    if not table_exists:
+        # Create the results table with the correct schema
+        c.execute('''CREATE TABLE results
+                     (timestamp TEXT, round INTEGER, language_vocab REAL, memory REAL, speed REAL,
+                      visual_discrimination REAL, audio_discrimination REAL, survey_score REAL,
+                      total_score REAL, prediction INTEGER)''')
+    else:
+        # Check if the table has the correct schema
+        c.execute("PRAGMA table_info(results)")
+        columns = [col[1] for col in c.fetchall()]
+        
+        expected_columns = ['timestamp', 'round', 'language_vocab', 'memory', 'speed',
+                            'visual_discrimination', 'audio_discrimination', 'survey_score',
+                            'total_score', 'prediction']
+        
+        # Add missing columns if they do not exist
+        for col in expected_columns:
+            if col not in columns:
+                c.execute(f"ALTER TABLE results ADD COLUMN {col} REAL")
+    
+    conn.commit()
+
+# Ensure the results table exists and has the correct schema
 create_or_update_table()
+
     
 # Close the database connection when done
 conn.close()
