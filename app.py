@@ -25,9 +25,6 @@ except requests.RequestException as e:
 except Exception as e:
     st.error(f"An error occurred: {e}")
 
-# Dummy data for prediction
-scores_reshaped = np.array([1.0, 2.0, 3.0]).reshape(1, -1)
-
 # Check if the model is loaded before using it
 if 'model' in locals():
     try:
