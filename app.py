@@ -7,7 +7,7 @@ import joblib
 
 # Load the pickled model
 with open('model.pkl', 'rb') as file:
-    model = pickle.load('model.pkl')
+    model = pickle.load(file)
     
     # Define quiz questions and options for both rounds
 questions_round1 = [
