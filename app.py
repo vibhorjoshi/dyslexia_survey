@@ -17,7 +17,7 @@ try:
 
     # Load the pickled model
     with open('model.pkl', 'rb') as file:
-        model = pickle.load(file)
+        model = joblib.load(file)
 
 except requests.RequestException as e:
     st.error(f"An error occurred while downloading the file: {e}")
