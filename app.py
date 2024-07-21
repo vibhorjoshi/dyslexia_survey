@@ -6,8 +6,12 @@ from datetime import datetime
 import joblib
 
 # Load the pickled model
-with open('model.pkl', 'rb') as file:
-    model = pickle.load(file)
+url = 'https://github.com/vibhorjoshi/dyslexia_survey/raw/main/model.pkl'
+response = requests.get(url)
+
+with open('model.pkl', 'wb') as file:
+    file.write(response.content)
+    
     
     # Define quiz questions and options for both rounds
 questions_round1 = [
