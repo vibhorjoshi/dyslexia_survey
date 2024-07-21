@@ -3,6 +3,8 @@ import pickle
 import numpy as np
 import requests
 import joblib
+import sqlite3
+from datetime import datetime
 
 # Load the pickled model
 url = 'https://github.com/vibhorjoshi/dyslexia_survey/raw/main/model.pkl'
@@ -35,6 +37,7 @@ if 'model' in locals():
         st.error(f"An error occurred during prediction: {e}")
 else:
     st.error("Model is not loaded.")
+
 
     # Define quiz questions and options for both rounds
 questions_round1 = [
