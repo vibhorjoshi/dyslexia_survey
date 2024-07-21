@@ -8,11 +8,16 @@ This project is a Dyslexia Prediction Model built using Streamlit and machine le
 
 ## Demo Video
 
- [streamlit-app-2024-05-18-15-05-84.webm](https://github.com/vibhorjoshi/dyslexia_survey/assets/105739194/8bcac8ed-1356-4e7d-926f-32f993dbb46b)
+ ["D:\acer\Documents\new_recording_-_7_22_2024,_1_07_26_am (720p).mp4"](https://github.com/vibhorjoshi/dyslexia_survey/assets/105739194/8bcac8ed-1356-4e7d-926f-32f993dbb46b)
 
 
-## Installation
-1. Clone the repository:
+## Architecture 
+
+ ![Untitled diagram-2024-07-13-181243]
+ 
+## Clone the repository
+
+Clone the repository:(https://github.com/user-attachments/assets/bad211fb-ece2-4601-bb53-cf93e701a90d)
 
 https://github.com/your_username/dyslexia-prediction.git
 
