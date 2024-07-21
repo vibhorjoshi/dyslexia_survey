@@ -24,7 +24,7 @@ except requests.RequestException as e:
 except Exception as e:
     st.error(f"An error occurred: {e}")
     
-  questions_round1 = [
+questions_round1 = [
     "Are the letters 'A' and 'A' the same?",
     "Identify the fruit shown in the image: 🍎 (Apple, Banana, Orange, Grapes).",
     "Are the letters 'B' and 'D' the same?",
