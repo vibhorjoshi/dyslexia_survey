@@ -78,4 +78,5 @@ webencodings==0.5.1
 widgetsnbextension==3.5.1
 yarg==0.1.9
 joblib
-scikit-learn==1.2.0
+scikit-learn 
+
