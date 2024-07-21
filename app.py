@@ -4,6 +4,7 @@ import numpy as np
 import sqlite3
 from datetime import datetime
 import joblib
+import requests
 
 url = 'https://github.com/vibhorjoshi/dyslexia_survey/raw/main/model.pkl'
 
