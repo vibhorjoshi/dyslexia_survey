@@ -1,4 +1,4 @@
-## dyslexia_survey
+## Dyslexia_survey
 
 ## Dyslexia Prediction Model
 
