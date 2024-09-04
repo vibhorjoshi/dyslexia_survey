@@ -1,6 +1,6 @@
-## Dyslexia_survey
+##  Dyslexia_survey
 
-## Dyslexia Prediction Model
+### Dyslexia Prediction Model
 
 ### Introduction
 This project is a Dyslexia Prediction Model built using Streamlit and machine learning techniques. It helps predict the likelihood of dyslexia based on quiz answers.
