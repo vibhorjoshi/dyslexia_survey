@@ -10,5 +10,3 @@ Clone the repository using the following command:
 ```bash
 git clone https://github.com/your_username/dyslexia-prediction.git
 
-
-
