@@ -1,4 +1,4 @@
-﻿anyio==2.2.0
+anyio==2.2.0
 argon2-cffi==20.1.0
 async-generator==1.10
 attrs==20.3.0
@@ -71,7 +71,7 @@ terminado==0.9.4
 testpath==0.4.4
 tornado==6.1
 traitlets==5.0.5
-urllib3==1.26.4
+urllib3==2.6.3
 virtualenv==20.7.2
 wcwidth==0.2.5
 webencodings==0.5.1
